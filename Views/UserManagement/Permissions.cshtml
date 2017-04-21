@@ -1,0 +1,67 @@
+
+@{
+	ViewData["Title"] = "Change Password";
+	var user = ViewData["User"] as EZCourse.Models.Entities.User;
+	var permissions = ViewData["Permissions"] as List<EZCourse.Models.Entities.Permission>;
+}
+
+<h2>Permissions of @($"{user.FirstName} {user.LastName}")</h2>
+
+@if (user.UserPermission.Any())
+{
+	<h3>Assigned Permissions</h3>
+	<form asp-action="RemovePermission" id="RemovePermissionForm">
+		<input type="hidden" name="userId" value="@(user.Id)" />
+		<input type="hidden" Id="RemovePermission_PermissionId" name="permissionId" />
+		<table class="table">
+			@foreach (var permission in permissions.Where(p => user.UserPermission.Any(up => up.PermissionId == p.Id)))
+			{
+				<tr>
+					<td>@permission.Title</td>
+					<td><button class="btn btn-danger remove-permission" data-permission-id="@permission.Id">Remove</button></td>
+				</tr>
+			}
+		</table>
+	</form>
+}
+
+@if (user.UserPermission.Count != permissions.Count)
+{
+	<h3>Unassigned Permissions</h3>
+	<form asp-action="AddPermission" id="AddPermissionForm">
+		<input type="hidden" name="userId" value="@(user.Id)" />
+		<input type="hidden" Id="AddPermission_PermissionId" name="permissionId" />
+		<table class="table">
+			@foreach (var permission in permissions.Where(p => user.UserPermission.All(up => up.PermissionId != p.Id)))
+			{
+				<tr>
+					<td>@permission.Title</td>
+					<td><button class="btn btn-primary add-permission" data-permission-id="@permission.Id">Add</button></td>
+				</tr>
+			}
+		</table>
+	</form>
+}
+
+<div>
+	<a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+
+	<script>
+		$(".remove-permission").click(function () {
+			var permissionId = $(this).data("permission-id");
+			$("#RemovePermission_PermissionId").val(permissionId);
+			$("#RemovePermissionForm").submit();
+		});
+
+		$(".add-permission").click(function () {
+			var permissionId = $(this).data("permission-id");
+			$("#AddPermission_PermissionId").val(permissionId);
+			$("#AddPermissionForm").submit();
+		});
+	</script>
+}
+
+
